@@ -307,6 +307,26 @@ class ChatModel extends Model
 }
 ```
 
+## Supervisor for production (Background Process)
+For a more robust solution, you can use a process control system like supervisor to manage the WebSocket server process.
+
+```bash
+sudo apt-get install supervisor
+
+-> Create a configuration file for the WebSocket server:
+-> Create a file named websocket_server.conf in /etc/supervisor/conf.d/ with the following content:
+    [program:websocket_server]
+    command=php /var/www/html/project/public/index.php server start
+    autostart=true
+    autorestart=true
+    stderr_logfile=/var/log/websocket_server.err.log
+    stdout_logfile=/var/log/websocket_server.out.log
+
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl start websocket_server
+```
+
 ## Starting the WebSocket Server
 
 Start the WebSocket server using the following command from the project/public folder:
