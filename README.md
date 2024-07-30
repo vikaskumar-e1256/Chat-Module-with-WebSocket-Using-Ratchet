@@ -262,6 +262,51 @@ class Chat extends BaseController
 }
 ```
 
+### 7. Model Code
+
+Implement the model logic:
+
+```php
+<?php
+
+namespace App\Models;
+
+use CodeIgniter\Model;
+
+class ChatModel extends Model
+{
+  protected $DBGroup              = 'default';
+  protected $table                = 'chat_messages';
+  protected $allowedFields        = ['sender_id', 'receiver_id', 'message'];
+  protected $primaryKey           = 'id';
+  protected $useAutoIncrement     = true;
+  protected $protectFields        = true;
+  protected $useTimestamps        = true;
+  protected $createdField         = 'created_at';
+  protected $updatedField         = 'updated_at';
+
+  public function getChatParticipants($userId)
+  {
+    $builder = $this->db->table('chat_messages');
+    $builder->select('users.id, users.username, users.email');
+    $builder->join('users', 'users.id = chat_messages.sender_id OR users.id = chat_messages.receiver_id');
+    $builder->groupStart()
+            ->where('chat_messages.sender_id', $userId)
+            ->orWhere('chat_messages.receiver_id', $userId)
+            ->groupEnd();
+    $builder->where('users.id !=', $userId);
+    $builder->groupBy('users.id');
+    $query = $builder->get();
+    return $query->getResultArray();
+  }
+
+  public function saveMessage($data)
+  {
+    return $this->insert($data);
+  }
+}
+```
+
 ## Starting the WebSocket Server
 
 Start the WebSocket server using the following command from the project/public folder:
